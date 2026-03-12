@@ -1,193 +1,158 @@
-# 🧠 FocusFlow — ADHD Planner for Adults
+# 🧠 FocusFlow — micro_serv_tdah
 
-> A productivity app designed for adult brains with ADHD. Because most productivity tools are built for neurotypical people.
+Planner de productividad pensado para **adultos con TDAH**, empaquetado como micro‑servicio/frontend independiente.  
+Esta versión está optimizada para demos locales: **IA simulada (sin llamadas externas)** y **auth simulada con `localStorage`**.
 
-![FocusFlow](https://img.shields.io/badge/status-MVP-10F5A0?style=flat-square) ![React](https://img.shields.io/badge/React-18-61DAFB?style=flat-square&logo=react) ![Supabase](https://img.shields.io/badge/Supabase-ready-3ECF8E?style=flat-square&logo=supabase) ![Vercel](https://img.shields.io/badge/deploy-Vercel-black?style=flat-square&logo=vercel)
-
----
-
-## ¿Qué problema resuelve?
-
-Las personas con TDAH adulto tienen dificultades específicas que las apps de productividad estándar ignoran:
-
-- **Parálisis por elección** — Ver 20 tareas activa el bloqueo en lugar de la acción
-- **Gestión de energía irregular** — El foco no es constante a lo largo del día
-- **Tiempo ciego** — Dificultad para percibir cuánto tiempo ha pasado o queda
-- **Inicio difícil** — Saber qué hacer no significa poder empezar a hacerlo
-- **Hiperfoco no dirigido** — La energía existe pero no se canaliza
-
-FocusFlow ataca exactamente estos puntos, no intenta ser un gestor de proyectos completo.
+![FocusFlow](https://img.shields.io/badge/status-MVP-10F5A0?style=flat-square) ![React](https://img.shields.io/badge/React-18-61DAFB?style=flat-square&logo=react) ![Vite](https://img.shields.io/badge/Vite-5-646CFF?style=flat-square&logo=vite) ![Vitest](https://img.shields.io/badge/tests-vitest-6E9F18?style=flat-square)
 
 ---
 
-## Features MVP
+## ¿Qué hace esta versión?
 
-### ✅ Tareas con contexto de energía
-Cada tarea se asigna a un bloque de energía (Mañana / Tarde / Baja energía), no a una hora concreta. Respeta cómo funciona el TDAH, no cómo funciona el reloj.
+- **Tareas con bloques de energía** (`mañana`, `tarde`, `baja energía`) en vez de horas concretas.
+- **Estado de foco** (`todo → doing → done`) con regla de **solo una tarea en `doing`**.
+- **Modo “Solo una cosa”**: overlay a pantalla casi completa con una sola tarea y sus pasos.
+- **Temporizador de foco** tipo Pomodoro (5, 10, 15, 25, 45 min) con recuento de sesiones.
+- **Asistente IA simulado** (sin API externa):
+  - **¿Qué hago ahora?** → elige 1 tarea y explica por qué.
+  - **Idea de descanso** → propone un break corto sin pantallas.
+  - **Dividir tarea difícil** → genera 3–4 microtareas (mock) y las añade a la tarea.
+- **Auth simulada**: login / registro / Google fake guardado en `localStorage` (`ff_user`).
+- **Persistencia local de tareas**: se guardan por usuario en `ff_tasks_<userId>`.
 
-### ⚡ Sistema de foco activo
-Una sola tarea puede estar "en foco" en todo momento. El banner persistente evita el olvido de contexto al volver después de una distracción.
-
-### 🎯 Modo "Solo una cosa"
-Pantalla negra de inmersión total. Desaparece todo excepto la tarea activa y sus pasos. Elimina la parálisis por elección en el momento crítico de empezar.
-
-### ⏱️ Temporizador Pomodoro adaptado
-Sesiones de 5, 10, 15, 25 o 45 minutos. Pensado para la variabilidad del foco en TDAH: no todos los días son de 25 minutos. Contador de sesiones completadas para refuerzo positivo.
-
-### ✨ Asistente IA (Claude API)
-Tres funciones concretas diseñadas para TDAH:
-1. **¿Qué hago ahora?** — Analiza tus tareas y tu energía actual y te dice UNA cosa, sin ambigüedad
-2. **Idea de descanso** — Sugerencias de reset entre sesiones (sin pantallas)
-3. **Dividir tarea** — Convierte tareas abrumadoras en 3-4 microtareas accionables
-
-### 🎊 Feedback de celebración
-Confetti animado al completar tareas. El refuerzo positivo inmediato es especialmente relevante para el TDAH.
-
-### 📱 Responsive completo
-Layout de una columna en móvil. Área táctil mínima de 44px. Pensado para gestionar tareas desde el teléfono cuando surge la idea.
+> Importante: **no se hace ningún `fetch` a Anthropic, OpenAI, etc.** Toda la IA es mock.
 
 ---
 
 ## Stack técnico
 
-| Capa | Tecnología | Decisión |
-|------|-----------|----------|
-| Frontend | React 18 + Vite | Rápido de iterar, ecosistema maduro |
-| Estilos | CSS-in-JS inline | Sin dependencias extra en MVP |
-| IA | Claude API (Anthropic) | Mejor comprensión contextual para prompts de TDAH |
-| Base de datos | Supabase | Auth + PostgreSQL + realtime sin backend propio |
-| Deploy | Vercel | CI/CD automático desde GitHub, free tier generoso |
-| Fuente | DM Sans | Legibilidad alta, moderna, sin serifa |
+| Capa           | Tecnología              | Notas                                                                 |
+|----------------|-------------------------|-----------------------------------------------------------------------|
+| Frontend       | React 18 + Vite 5       | SPA ligera, sin routing complejo                                     |
+| Estilos        | Inline CSS-in-JS        | Sin Tailwind ni UI libs, todo con design tokens                      |
+| Estado tareas  | Hooks React + localStorage | `useTasks` y lógica de “solo una en doing”                         |
+| Auth           | Hook `useAuth` simulado | Pensado para conectar fácilmente a Supabase después                  |
+| IA             | Mock JS (`callAI`)      | Respuestas deterministas/aleatorias, sin red                         |
+| Testing        | Vitest + RTL            | `src/App.test.jsx`                                                    |
 
 ---
 
 ## Estructura del proyecto
 
 ```
-focusflow/
+micro_serv_tdah/
 ├── src/
+│   ├── App.jsx                 # App raíz: auth, layout, lógica global
+│   ├── App.test.jsx            # Tests de smoke de tablero + IA simulada
 │   ├── components/
-│   │   ├── TaskCard.jsx          # Tarjeta de tarea con acciones
-│   │   ├── QuickAdd.jsx          # Input de añadir tarea (siempre visible)
-│   │   ├── AIPanel.jsx           # Panel de asistente IA
-│   │   ├── FocusTimer.jsx        # Temporizador Pomodoro
-│   │   ├── FocusMode.jsx         # Overlay "Solo una cosa"
-│   │   ├── Section.jsx           # Sección de tareas por bloque energía
-│   │   └── DoneSection.jsx       # Completadas (colapsable)
-│   ├── lib/
-│   │   ├── claude.js             # Cliente Claude API
-│   │   ├── supabase.js           # Cliente Supabase
-│   │   └── helpers.js            # Utilidades (formatTime, etc.)
+│   │   ├── TaskCard.jsx        # Tarjeta de tarea
+│   │   ├── QuickAdd.jsx        # Input rápido de tareas
+│   │   ├── AIPanel.jsx         # Panel del asistente IA (mock)
+│   │   ├── FocusTimer.jsx      # Temporizador de foco
+│   │   ├── FocusMode.jsx       # Overlay "Solo una cosa"
+│   │   ├── Section.jsx         # Secciones por energía
+│   │   └── DoneSection.jsx     # Lista colapsable de completadas
 │   ├── hooks/
-│   │   ├── useTasks.js           # Estado y lógica de tareas
-│   │   ├── useTimer.js           # Lógica del temporizador
-│   │   └── useResponsive.js      # Detección mobile/desktop
+│   │   ├── useResponsive.js    # Detección móvil/escritorio
+│   │   ├── useTasks.js         # (versión inicial, ahora no usada por App.jsx)
+│   │   └── useTimer.js         # Hook genérico de timer (para la versión anterior)
 │   ├── constants/
-│   │   ├── colors.js             # Design tokens
-│   │   └── config.js             # ENERGY_BLOCKS, EMOJIS, PRESETS
-│   ├── App.jsx                   # Componente raíz + layout
-│   └── main.jsx                  # Entry point
-├── supabase/
-│   └── schema.sql                # Esquema de base de datos
+│   │   ├── colors.js           # Design tokens
+│   │   └── config.js           # Energía, presets, emojis
+│   ├── lib/
+│   │   ├── claude.js           # Cliente simulado de IA (no se usa en App actual)
+│   │   ├── helpers.js          # Utilidades (formato tiempo, confetti)
+│   │   └── supabase.js         # Cliente Supabase (no usado aún)
+│   ├── index.css               # Reset ligero + tema global
+│   ├── main.jsx                # Entry ReactDOM
+│   └── setupTests.js           # Config Vitest / RTL
 ├── public/
-├── .env.example
-├── .env.local                    # (no subir a git)
-├── vite.config.js
+│   └── vite.svg                # Favicon minimalista
+├── supabase/
+│   └── schema.sql              # Esquema propuesto para persistencia real de tareas
+├── Readme                      # Este archivo
+├── agent.md                    # Guía para agentes IA (Claude, Cursor, etc.)
 ├── package.json
-├── requirements.txt              # Dependencias Python (si hay scripts)
-├── AGENT.md                      # Instrucciones para agentes IA
-└── README.md
+├── package-lock.json
+├── requirements.txt            # Dependencias Python auxiliares
+├── vite.config.js
+└── .env.example
 ```
+
+> Nota: algunos hooks/lib (`useTasks`, `useTimer`, `claude.js`, `supabase.js`) vienen de la
+> versión anterior y sirven como punto de partida para futuras integraciones (Supabase, IA real).
 
 ---
 
 ## Variables de entorno
 
+Para esta versión **no necesitas claves de IA**. Solo se usan env vars si decides conectar Supabase:
+
 ```bash
-# .env.local
-VITE_ANTHROPIC_API_KEY=sk-ant-...
+# .env.local (opcional)
 VITE_SUPABASE_URL=https://xxxx.supabase.co
 VITE_SUPABASE_ANON_KEY=eyJ...
 ```
 
-> ⚠️ Nunca subas `.env.local` a git. Está en `.gitignore` por defecto con Vite.
+`VITE_ANTHROPIC_API_KEY` **no se usa** en esta versión porque la IA es simulada.
 
 ---
 
 ## Setup local
 
 ```bash
-# 1. Clonar
-git clone https://github.com/tu-usuario/focusflow.git
-cd focusflow
+# 1. Clonar el repo
+git clone https://github.com/Diana-Bernardos/micro_serv_tdah.git
+cd micro_serv_tdah
 
-# 2. Instalar dependencias
+# 2. Instalar dependencias Node
 npm install
 
-# 3. Configurar variables de entorno
+# 3. (Opcional) crear .env.local si vas a conectar Supabase
 cp .env.example .env.local
-# Editar .env.local con tus keys
+# Rellenar VITE_SUPABASE_URL y VITE_SUPABASE_ANON_KEY si procede
 
 # 4. Arrancar en desarrollo
 npm run dev
+# Vite mostrará la URL (por defecto http://127.0.0.1:5173 o 5174)
 ```
 
 ---
 
-## Base de datos (Supabase)
-
-```sql
--- Ejecutar en Supabase SQL Editor
-create table tasks (
-  id          uuid default gen_random_uuid() primary key,
-  user_id     uuid references auth.users not null,
-  text        text not null,
-  emoji       text default '🎯',
-  col         text default 'todo' check (col in ('todo','doing','done')),
-  energy      text check (energy in ('morning','afternoon','lowEnergy')),
-  subtasks    jsonb default '[]',
-  created_at  timestamptz default now(),
-  updated_at  timestamptz default now()
-);
-
--- Row Level Security
-alter table tasks enable row level security;
-
-create policy "Users see own tasks"
-  on tasks for all
-  using (auth.uid() = user_id);
-```
-
----
-
-## Deploy en Vercel
+## Testing y calidad
 
 ```bash
-# Con Vercel CLI
-npm i -g vercel
-vercel
+# Ejecutar tests una vez
+npm test
 
-# O conecta el repo en vercel.com y añade las env vars en el dashboard
+# Tests en modo watch
+npm run test:watch
+
+# Cobertura
+npm run test:coverage
+
+# Lint
+npm run lint
 ```
+
+Tests actuales:
+- `App.test.jsx` comprueba:
+  - Que con un usuario simulado en `localStorage` se muestra el tablero principal.
+  - Que el panel del **Asistente IA simulado** se renderiza correctamente.
 
 ---
 
-## Roadmap post-MVP
+## Roadmap corto (ideas)
 
-- [ ] Auth con Supabase (email + Google)
-- [ ] Persistencia real de tareas en BD
-- [ ] Recordatorios inteligentes (push notifications)
-- [ ] Estadísticas semanales de foco
-- [ ] Modo oscuro / claro configurable
-- [ ] Integración con Google Calendar
-- [ ] Versión iOS/Android con Capacitor
+- Conectar auth real con Supabase (email + Google).
+- Sustituir IA simulada por llamadas reales (Claude, OpenAI, etc.) detrás de un backend propio.
+- Persistencia real de tareas en PostgreSQL/Supabase (usando `supabase/schema.sql`).
+- Estadísticas semanales de foco y energía.
 
 ---
 
 ## Licencia
 
 MIT — Úsalo, fórkalo, mejóralo.
-
----
 
 *Construido con experiencia personal. El TDAH no es una excusa, es un contexto.*

@@ -1,0 +1,22 @@
+# ============================================================
+# FocusFlow — Dependencias del proyecto
+# ============================================================
+#
+# Este archivo documenta TODAS las dependencias.
+# El proyecto es principalmente JavaScript/React.
+# Este requirements.txt cubre scripts Python auxiliares
+# (scripts de seed, análisis, etc.)
+#
+# Para las dependencias JS, ver package.json
+# ============================================================
+
+# ── SCRIPTS DE BASE DE DATOS / SEED ─────────────────────────
+supabase==2.3.4           # Cliente Python de Supabase (scripts de seed/migración)
+python-dotenv==1.0.0      # Cargar variables de entorno desde .env
+
+# ── SCRIPTS DE ANÁLISIS (opcional, post-MVP) ─────────────────
+pandas==2.1.4             # Análisis de datos de uso
+httpx==0.26.0             # HTTP client async para scripts de testing
+
+# ── HERRAMIENTAS DE DESARROLLO ───────────────────────────────
+black==23.12.1            # Formateador de código Python
